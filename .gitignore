@@ -1,0 +1,21 @@
+# Środowisko wirtualne Pythona i cache
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Zmienne środowiskowe i klucze API (NIGDY nie commitować!)
+.env
+
+# Lokalna baza danych SQLite (generuje się automatycznie przy starcie)
+*.db
+*.sqlite3
+
+# Paczki wdrożeniowe AWS Lambda
+package/
+lambda_function.zip
+
+# Pliki systemowe i edytora
+.DS_Store
+Thumbs.db

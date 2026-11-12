@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 import pytest
 from fastapi.testclient import TestClient
 
@@ -16,7 +17,7 @@ except ImportError:
 # ==========================================
 
 @pytest.fixture()
-def client(tmp_path) -> TestClient:
+def client(tmp_path) -> Iterator[TestClient]:
     """
     Create a FastAPI TestClient wired to an isolated temporary SQLite database
     and deterministic AI fallback service (no external API calls during tests).

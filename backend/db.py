@@ -233,7 +233,7 @@ class SQLiteRideRepository(RideRepository):
 class DynamoDBRideRepository(RideRepository):
     """Cloud AWS DynamoDB implementation of the RideRepository interface."""
 
-    def __init__(self, table_name: str = "QuickPoolRides", region_name: str = "eu-central-1") -> None:
+    def __init__(self, table_name: str = "QuickPoolRides", region_name: str = "eu-north-1") -> None:
         # Encapsulation: private boto3 table resource
         self._dynamodb = boto3.resource("dynamodb", region_name=region_name)
         self._table = self._dynamodb.Table(table_name)

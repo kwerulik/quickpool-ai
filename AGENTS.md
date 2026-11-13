@@ -14,7 +14,7 @@ It combines a REST API CRUD for managing shared rides with an AI Natural Languag
   - Local implementation (`USE_AWS=false`): `SQLiteRideRepository` using built-in `sqlite3` (`quickpool.db`) with automatic data seeding.
   - Cloud implementation (`USE_AWS=true`): `DynamoDBRideRepository` using `boto3` (`QuickPoolRides` table).
 - **AI Integration:** Encapsulated inside `AIRideParserService` class using Google Gemini API (`google-genai` SDK) with Structured Outputs and a deterministic fallback mode when `GEMINI_API_KEY` is not configured.
-- **Frontend:** Pure HTML5, Vanilla JavaScript (ES6+ class-based controller), and Tailwind CSS via CDN.
+- **Frontend:** Pure HTML5, modular Vanilla JavaScript (ES6+ async/await REST client with localStorage ownership tracking), and Tailwind CSS via CDN.
 
 ## Directory Structure
 - `backend/main.py` — FastAPI app, CORS middleware, Dependency Injection wiring, REST endpoints, and Mangum handler.
@@ -22,7 +22,7 @@ It combines a REST API CRUD for managing shared rides with an AI Natural Languag
 - `backend/ai.py` — `AIRideParserService` class handling LLM prompt and structured parsing.
 - `backend/test_api.py` — Pytest suite testing CRUD and AI parsing endpoints.
 - `frontend/index.html` — Single-page responsive UI styled with Tailwind CSS CDN.
-- `frontend/app.js` — OOP Vanilla JS frontend controller (`QuickPoolApp` class).
+- `frontend/app.js` — Modular ES6+ frontend controller handling CRUD, AI Smart Paste, inline seat booking drawer, and XSS protection.
 
 ## Coding Standards for AI Assistants
 1. Follow clean Object-Oriented design patterns and SOLID principles (Single Responsibility, Dependency Inversion).

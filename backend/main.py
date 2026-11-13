@@ -7,10 +7,10 @@ from mangum import Mangum
 # Support running both from project root (backend.db) and inside AWS Lambda package (db)
 try:
     from backend.ai import AIParseRequest, AIRideParserService, get_ai_parser_service
-    from backend.db import Ride, RideCreate, RideRepository, get_ride_repository
+    from backend.db import BookingRequest, Ride, RideCreate, RideRepository, get_ride_repository
 except ImportError:
     from ai import AIParseRequest, AIRideParserService, get_ai_parser_service
-    from db import Ride, RideCreate, RideRepository, get_ride_repository
+    from db import BookingRequest ,Ride, RideCreate, RideRepository, get_ride_repository
 
 
 # ==========================================
@@ -107,26 +107,24 @@ def update_ride(
     return updated
 
 
-@app.patch("/api/rides/{ride_id}/book", response_model=Ride, tags=["Rides CRUD"])
+@app.patch("/api/rides/{ride_id}/book", response_model=Ride)
 def book_ride_seat(
     ride_id: str,
+    booking: Optional[BookingRequest] = None,
     repo: RideRepository = Depends(get_ride_repository),
 ) -> Ride:
-    """Book 1 seat in the selected ride (decrements available_seats by 1)."""
-    existing = repo.get_by_id(ride_id)
-    if not existing:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Ride with ID '{ride_id}' not found.",
-        )
-    if existing.available_seats <= 0:
+    """Decrement available seats by 1 and attach passenger pickup details."""
+    booking_summary = ""
+    if booking:
+        booking_summary = f"{booking.passenger_name} ({booking.passenger_contact}, {booking.pickup_spot})"
+
+    updated = repo.book_seat(ride_id, booking_summary)
+    if not updated:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No available seats left for this ride.",
+            detail="Ride not found or no available seats left",
         )
-
-    booked = repo.book_seat(ride_id)
-    return booked
+    return updated
 
 
 @app.delete("/api/rides/{ride_id}", status_code=status.HTTP_200_OK, tags=["Rides CRUD"])

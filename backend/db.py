@@ -28,6 +28,13 @@ class Ride(RideCreate):
     id: str
 
 
+class BookingRequest(BaseModel):
+    """Payload for reserving a seat with passenger contact details."""
+    passenger_name: str = Field(default="Pasażer", min_length=2, max_length=40)
+    passenger_contact: str = Field(
+        default="Brak telefonu", min_length=3, max_length=60)
+    pickup_spot: str = Field(default="Na trasie", max_length=80)
+
 # ==========================================
 # 2. ABSTRACTION (Repository Interface)
 # ==========================================
@@ -56,8 +63,8 @@ class RideRepository(ABC):
         pass
 
     @abstractmethod
-    def book_seat(self, ride_id: str) -> Optional[Ride]:
-        """Decrement available_seats by 1 if seats are available."""
+    def book_seat(self, ride_id: str, booking_info: str = "") -> Optional[Ride]:
+        """Atomically decrement available_seats by 1 and append passenger info."""
         pass
 
     @abstractmethod
@@ -203,10 +210,17 @@ class SQLiteRideRepository(RideRepository):
             conn.commit()
         return updated_ride
 
-    def book_seat(self, ride_id: str) -> Optional[Ride]:
+
+    def book_seat(self, ride_id: str, booking_info: str = "") -> Optional[Ride]:
         ride = self.get_by_id(ride_id)
         if not ride or ride.available_seats <= 0:
-            return None
+                return None
+
+        updated_notes = ride.notes or ""
+        if booking_info:
+            sep = " | " if updated_notes else ""
+            updated_notes = f"{updated_notes}{sep}[Booking: {booking_info}]"[
+                :300]
 
         updated_data = RideCreate(
             driver_name=ride.driver_name,
@@ -215,7 +229,7 @@ class SQLiteRideRepository(RideRepository):
             departure_time=ride.departure_time,
             available_seats=ride.available_seats - 1,
             price_pln=ride.price_pln,
-            notes=ride.notes,
+            notes=updated_notes,
         )
         return self.update(ride_id, updated_data)
 
@@ -274,10 +288,17 @@ class DynamoDBRideRepository(RideRepository):
         self._table.put_item(Item=self._to_dynamo_item(updated_ride))
         return updated_ride
 
-    def book_seat(self, ride_id: str) -> Optional[Ride]:
+
+    def book_seat(self, ride_id: str, booking_info: str = "") -> Optional[Ride]:    
         ride = self.get_by_id(ride_id)
         if not ride or ride.available_seats <= 0:
             return None
+
+        updated_notes = ride.notes or ""
+        if booking_info:
+            sep = " | " if updated_notes else ""
+            updated_notes = f"{updated_notes}{sep}[Booking: {booking_info}]"[
+                :300]
 
         updated_data = RideCreate(
             driver_name=ride.driver_name,
@@ -286,7 +307,7 @@ class DynamoDBRideRepository(RideRepository):
             departure_time=ride.departure_time,
             available_seats=ride.available_seats - 1,
             price_pln=ride.price_pln,
-            notes=ride.notes,
+            notes=updated_notes,
         )
         return self.update(ride_id, updated_data)
 

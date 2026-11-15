@@ -2,9 +2,10 @@
  * QuickPool AI - Frontend Application Logic (Vanilla JS ES6+)
  * Communicates with FastAPI backend via REST API (JSON).
  */
-
-const API_BASE_URL =
-  "https://w3cosmdp4i627vdpgi3xg6sfje0kache.lambda-url.eu-north-1.on.aws/api";
+const IS_CLOUD_HOSTED = window.location.hostname.includes("amazonaws.com");
+const API_BASE_URL = IS_CLOUD_HOSTED
+  ? "https://w3cosmdp4i627vdpgi3xg6sfje0kache.lambda-url.eu-north-1.on.aws/api"
+  : "http://127.0.0.1:8080/api";
 const OWNED_RIDES_KEY = "quickpool_my_rides";
 
 // DOM Elements
